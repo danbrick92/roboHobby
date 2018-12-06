@@ -18,7 +18,7 @@ CHUNK = 4096
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-RECORD_SECONDS = 2
+RECORD_SECONDS = 5
 WAVE_OUTPUT_FILENAME = "output.wav"
 BACKOUT_PERIOD = 60 # in seconds
 
@@ -52,9 +52,10 @@ def record_audio():
     stream.stop_stream()
     stream.close()
     p.terminate()
+    return p,frames
     
 # Saves the recorded audio to a wav file
-def save_wav():
+def save_wav(p,frames):
     print("Saving audio to " + str(WAVE_OUTPUT_FILENAME))
     wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
     wf.setnchannels(CHANNELS)
@@ -115,8 +116,8 @@ def main():
     alarm = { "count" : 0, "last_triggered" : datetime.datetime.now()}
     while True:
         alarm = check_alarm_decrement(alarm)
-        record_audio()
-        save_wav()
+        audio,frames = record_audio()
+        save_wav(audio,frames)
         alarm = analysis(alarm)
         alarm = check_trigger_alarm(alarm)
         time.sleep(2)
