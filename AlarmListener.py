@@ -115,8 +115,8 @@ def main():
     alarm = { "count" : 0, "last_triggered" : datetime.datetime.now()}
     while True:
         alarm = check_alarm_decrement(alarm)
-        #record_audio()
-        #save_wav()
+        record_audio()
+        save_wav()
         alarm = analysis(alarm)
         alarm = check_trigger_alarm(alarm)
         time.sleep(2)
