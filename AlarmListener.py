@@ -1,10 +1,8 @@
 """
 This program streams microphone input and listens for security system alarm.
 In the case that it picks up the alarm, it will alert the sms receiver.
-
-To Do:
--Send SMS to person from SMS file
 """
+
 import time
 import math
 import pyaudio
