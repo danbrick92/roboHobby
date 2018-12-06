@@ -3,11 +3,6 @@ This program streams microphone input and listens for security system alarm.
 In the case that it picks up the alarm, it will alert the sms receiver.
 
 To Do:
--Breakout steps into functions
--Logic to trigger alarm state
-  -Sleep timer of 1
-  -Consecutive dB timer of 5 (within a period of 20 seconds)
-  -Alarm state sleep timer of 1 hour
 -Send SMS to person from SMS file
 """
 import time
@@ -18,6 +13,8 @@ import sys
 import datetime
 from pyAudioAnalysis import audioBasicIO
 from pyAudioAnalysis import audioFeatureExtraction
+import smtplib
+import ssl
 
 CHUNK = 4096
 FORMAT = pyaudio.paInt16
@@ -25,6 +22,19 @@ CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 2
 WAVE_OUTPUT_FILENAME = "output.wav"
+BACKOUT_PERIOD = 60 # in seconds
+
+# This function checks if the previous alarm was triggered past the backout period
+def check_alarm_decrement(alarm):
+    if alarm['count'] > 0:
+        print("Checking if alarm is older than " + str(BACKOUT_PERIOD) + " seconds old")
+        now = datetime.datetime.now()
+        limit = now - datetime.timedelta(seconds=BACKOUT_PERIOD)
+        then = alarm['last_triggered']
+        if limit > then:
+            alarm['count'] -= 1
+            print("Alarm was triggered more than the backout period. Decrementing to " + str(alarm['count']))
+    return alarm    
 
 # This function records audio from the microphone
 def record_audio():
@@ -63,6 +73,7 @@ def analysis(alarm):
     averageEnergy = sum(F[1,:])/len(F[1,:])
     if averageEnergy >= .15:
         alarm["count"] += 1
+        alarm['last_triggered'] = datetime.datetime.now()
         print("Alarm loudness reached. Count is " + str(alarm["count"]))
     return alarm
 
@@ -76,20 +87,36 @@ def check_trigger_alarm(alarm):
         
 # Logic for what alarm trigger does
 def trigger_alarm(alarm):
-    send_sms("The security system alarm has been triggered")
+    send_email("The security system alarm has been triggered")
     alarm["count"] = 0
     print("Waiting for one hour")
     time.sleep(3600) # Sleep for an hour - don't want to be bombarded with texts
     return alarm
     
-# Sends a text message to numbers from data file
-def send_sms(message):
-    return 0
+# Sends an email message to addresses from data file
+def send_email(message):
+    s1,s1p,r1,r2 = get_sending_data()
+    port = 465
+    context = ssl.create_default_context()
+    server = smtplib.SMTP_SSL("smtp.gmail.com", port)
+    server.login(s1, s1p)
+    server.sendmail(s1, r1, message)
+    #server.sendmail(s1, r2, message)
+    server.quit()
+
+# Gets data file and returns values
+def get_sending_data():
+    with open('/home/pi/Programming/alarmdata.csv') as data_file:
+        content = data_file.read()
+    content = content.splitlines()
+    contents = content[1].split(',')
+    return contents[0],contents[1],contents[2],contents[3]
 
 def main():
     print("Starting loop")
     alarm = { "count" : 0, "last_triggered" : datetime.datetime.now()}
     while True:
+        alarm = check_alarm_decrement(alarm)
         #record_audio()
         #save_wav()
         alarm = analysis(alarm)
