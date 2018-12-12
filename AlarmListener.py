@@ -20,6 +20,7 @@ CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 5
 WAVE_OUTPUT_FILENAME = "output.wav"
+LOG_FILE = 'notableEvents.log'
 BACKOUT_PERIOD = 60 # in seconds
 
 # This function checks if the previous alarm was triggered past the backout period
@@ -70,16 +71,19 @@ def analysis(alarm):
     [Fs, x] = audioBasicIO.readAudioFile("output.wav");
     F, f_names = audioFeatureExtraction.stFeatureExtraction(x, Fs, 1.0000*Fs, 0.025*Fs);
     averageEnergy = sum(F[1,:])/len(F[1,:])
-    if averageEnergy >= .15:
+    if averageEnergy >= .2:
+        print(str(averageEnergy))
         alarm["count"] += 1
         alarm['last_triggered'] = datetime.datetime.now()
+        print("Time is " + str(alarm['last_triggered']))
         print("Alarm loudness reached. Count is " + str(alarm["count"]))
+        log(averageEnergy,alarm['last_triggered'])
     return alarm
 
 # Triggers alarm based on ALARM COUNT
 def check_trigger_alarm(alarm):
     print("Checking if alarm state is reached.")
-    if alarm["count"] >= 3:
+    if alarm["count"] >= 1:
         print "Triggering alarm..."
         alarm = trigger_alarm(alarm)
     return alarm
@@ -111,6 +115,12 @@ def get_sending_data():
     contents = content[1].split(',')
     return contents[0],contents[1],contents[2],contents[3]
 
+# Log any important events
+def log(average_volume,timestamp):
+    message = str(timestamp) + "  -  Volume: " + str(average_volume)
+    with open(LOG_FILE,'a+') as log_file:
+        log_file.write(message)
+    
 def main():
     print("Starting loop")
     alarm = { "count" : 0, "last_triggered" : datetime.datetime.now()}
