@@ -13,6 +13,10 @@ from pyAudioAnalysis import audioBasicIO
 from pyAudioAnalysis import audioFeatureExtraction
 import smtplib
 import ssl
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+from email.MIMEBase import MIMEBase
+from email import encoders
 
 CHUNK = 4096
 FORMAT = pyaudio.paInt16
@@ -99,11 +103,26 @@ def trigger_alarm(alarm):
 # Sends an email message to addresses from data file
 def send_email(message):
     s1,s1p,r1,r2 = get_sending_data()
+    
+    msg = MIMEMultipart()
+    msg['From'] = s1
+    msg['To'] = r1
+    msg['Subject'] = "Alarm Triggered"
+    msg.attach(MIMEText(message, 'plain'))
+    attachment = open(WAVE_OUTPUT_FILENAME, "rb")
+    
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload((attachment).read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', "attachment; filename= %s" % WAVE_OUTPUT_FILENAME)
+    msg.attach(part)
+    
     port = 465
     context = ssl.create_default_context()
     server = smtplib.SMTP_SSL("smtp.gmail.com", port)
     server.login(s1, s1p)
-    server.sendmail(s1, r1, message)
+    text = msg.as_string()
+    server.sendmail(s1, r1, text)
     #server.sendmail(s1, r2, message)
     server.quit()
 
