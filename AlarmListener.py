@@ -75,7 +75,8 @@ def analysis(alarm):
     [Fs, x] = audioBasicIO.readAudioFile("output.wav");
     F, f_names = audioFeatureExtraction.stFeatureExtraction(x, Fs, 1.0000*Fs, 0.025*Fs);
     averageEnergy = sum(F[1,:])/len(F[1,:])
-    if averageEnergy >= .2:
+    print "Energy=" + str(averageEnergy)
+    if averageEnergy >= .15:
         print(str(averageEnergy))
         alarm["count"] += 1
         alarm['last_triggered'] = datetime.datetime.now()
