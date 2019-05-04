@@ -9,6 +9,7 @@ import pyaudio
 import wave
 import sys
 import datetime
+import numpy as np
 from pyAudioAnalysis import audioBasicIO
 from pyAudioAnalysis import audioFeatureExtraction
 import smtplib
@@ -71,18 +72,65 @@ def save_wav(p,frames):
 
 # Analyze dB to match alarm sound levels
 def analysis(alarm):
-    print("Analyzing audio for alarm levels of loudness")
-    [Fs, x] = audioBasicIO.readAudioFile("output.wav");
-    F, f_names = audioFeatureExtraction.stFeatureExtraction(x, Fs, 1.0000*Fs, 0.025*Fs);
-    averageEnergy = sum(F[1,:])/len(F[1,:])
-    print "Energy=" + str(averageEnergy)
-    if averageEnergy >= .15:
-        print(str(averageEnergy))
+    print("Analyzing audio for alarm pitch")
+    frequencies = list() # ME
+    chunk = CHUNK
+    # open up a wave
+    wf = wave.open('output.wav', 'rb')
+    swidth = wf.getsampwidth()
+    RATE = wf.getframerate()
+    # use a Blackman window
+    window = np.blackman(chunk)
+    # open stream
+    p = pyaudio.PyAudio()
+    stream = p.open(format =
+                p.get_format_from_width(wf.getsampwidth()),
+                channels = wf.getnchannels(),
+                rate = RATE,
+                output = True)
+    # read some data
+    data = wf.readframes(chunk)
+    # play stream and find the frequency of each chunk
+    while len(data) == chunk*swidth:
+        # write data out to the audio stream
+        stream.write(data)
+        # unpack the data and times by the hamming window
+        indata = np.array(wave.struct.unpack("%dh"%(len(data)/swidth),\
+                                         data))*window
+        # Take the fft and square each value
+        fftData=abs(np.fft.rfft(indata))**2
+        # find the maximum
+        which = fftData[1:].argmax() + 1
+        # use quadratic interpolation around the max
+        if which != len(fftData)-1:
+            y0,y1,y2 = np.log(fftData[which-1:which+2:])
+            x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
+            # find the frequency and output it
+            thefreq = (which+x1)*RATE/chunk
+            frequencies.append(thefreq)
+            #print "The freq is %f Hz." % (thefreq)
+        else:
+            thefreq = which*RATE/chunk
+            frequencies.append(thefreq)
+            #print "The freq is %f Hz." % (thefreq)
+        # read some more data
+        data = wf.readframes(chunk)
+    if data:
+        stream.write(data)
+    stream.close()
+    p.terminate()
+
+    # Check to trigger
+    maxPitch = max(frequencies)
+    print("Pitch Max=" + str(maxPitch))
+
+    if maxPitch > 3300 and maxPitch < 3340:
+        print(str(maxPitch))
         alarm["count"] += 1
         alarm['last_triggered'] = datetime.datetime.now()
         print("Time is " + str(alarm['last_triggered']))
         print("Alarm loudness reached. Count is " + str(alarm["count"]))
-        log(averageEnergy,alarm['last_triggered'])
+        log(maxPitch,alarm['last_triggered'])
     return alarm
 
 # Triggers alarm based on ALARM COUNT
