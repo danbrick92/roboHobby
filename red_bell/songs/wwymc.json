@@ -1,0 +1,7 @@
+{
+  "directions": [
+    { "1.5" : "hi_slow"},
+    { "2.6" : "hi_slow"},
+    { "5.8" : "hi_slow"}
+  ]
+}
