@@ -22,6 +22,7 @@ def switch_pin(pin):
         GPIO.output(pin, GPIO.LOW)
     
 def hi_fade():
+    
     switch_pin(11)
     time.sleep(FAST)
     switch_pin(13)
@@ -64,10 +65,13 @@ def blink(on_type):
         time.sleep(FAST)
         med()
     elif on_type == 'hi':
+        start = time.time()
         hi()
         time.sleep(FAST)
         hi()
-    elif on_type == 'hi_slow': # takes .25 seconds
+        end = time.time()
+        print(end-start)
+    elif on_type == 'hi_slow': 
         hi_slow()
         hi_slow()
     elif on_type == 'hi_fade':
@@ -81,6 +85,6 @@ def get_time(on_type):
     if on_type == "hi_slow":
         return SLOW*2
     else:
-        return FAST*2
+        return FAST
     
 #blink('hi')
