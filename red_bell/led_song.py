@@ -31,26 +31,17 @@ class led_song:
         for i in range(0,fin):
             d = list_of_dir[i]
             cur = float(list(d.keys())[0])
+            on_type = list(d.values())[0]
             w_time = cur-last
-            new_dir = [w_time, list(d.values())[0] ]
+            new_dir = [w_time, on_type]
             self.directions = self.directions + new_dir
-            last = cur
+            last = cur + led.get_time(on_type)
         print("Directions set")
         
     # Play the led song from directions
     def play(self):
         for d in self.directions:
             if isinstance(d,str):
-                for i in range(0,2):
-                    if d == "hi":
-                        led.hi()
-                    elif d == "med":
-                        led.med()
-                    elif d == "low":
-                        led.low()
-                    elif d == "hi_fast":
-                        led.hi_fast()
-                    elif d == "hi_slow":
-                        led.hi_slow()
+                led.blink(d)
             else:
                 time.sleep(d)

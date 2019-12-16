@@ -2,7 +2,7 @@ import os
 import _thread
 import led_song
 
-SONGS = [ "scctt" , "wwymc"]
+SONGS = [ "wwymc", "scctt" ]
 
 def get_song_filename(song):
     return 'songs/' + song + '.wav'
@@ -21,5 +21,5 @@ def do_show(song):
     _thread.start_new_thread( play, (fname,) )
     _thread.start_new_thread( light_show, (ls ,) )
     
-for song in songs:
+for song in SONGS:
     do_show(song)
