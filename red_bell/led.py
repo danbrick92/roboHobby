@@ -65,12 +65,12 @@ def blink(on_type):
         time.sleep(FAST)
         med()
     elif on_type == 'hi':
-        start = time.time()
+        #start = time.time()
         hi()
         time.sleep(FAST)
         hi()
-        end = time.time()
-        print(end-start)
+        #end = time.time()
+        #print(end-start)
     elif on_type == 'hi_slow': 
         hi_slow()
         hi_slow()

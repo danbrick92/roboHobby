@@ -40,8 +40,10 @@ class led_song:
         
     # Play the led song from directions
     def play(self):
+        led.all_off()
         for d in self.directions:
             if isinstance(d,str):
                 led.blink(d)
             else:
                 time.sleep(d)
+        led.all_off()
