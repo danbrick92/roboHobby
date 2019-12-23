@@ -4,7 +4,7 @@ import led_song
 import switch
 import time
 
-SONGS = [ "wwymc"]#, "scctt" ]
+SONGS = [ "scctt", "wwymc", "rrr", "jb"]
 
 def get_song_filename(song):
     return '/home/pi/Programmer/roboHobby/red_bell/songs/' + song + '.wav'
@@ -22,7 +22,13 @@ def do_show(song):
     # Begin show
     _thread.start_new_thread( play, (fname,) )
     _thread.start_new_thread( light_show, (ls ,) )
-    time.sleep(11) # Sleep for max song length
+    # Sleep
+    sleep_time = 11
+    if song == 'rrr':
+        sleep_time = 9
+    if song == 'jb':
+        sleep_time = 7
+    time.sleep(sleep_time) # Sleep for max song length
     
 
 while True:
