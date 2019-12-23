@@ -20,7 +20,7 @@ class led_song:
     
     # Gets a song config file
     def get_led_song_fname(self,song):
-        self.config_file = 'songs/' + song + '.json'
+        self.config_file = '/home/pi/Programmer/roboHobby/red_bell/songs/' + song + '.json'
         
     # Set directions from config data
     def set_directions(self):

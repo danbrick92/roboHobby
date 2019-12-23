@@ -7,7 +7,7 @@ import time
 SONGS = [ "wwymc"]#, "scctt" ]
 
 def get_song_filename(song):
-    return 'songs/' + song + '.wav'
+    return '/home/pi/Programmer/roboHobby/red_bell/songs/' + song + '.wav'
 
 def play(file):
     os.system("aplay " + file)

@@ -25,22 +25,22 @@ def hi_fade():
     
     switch_pin(11)
     time.sleep(FAST)
-    switch_pin(13)
+    switch_pin(15)
     
 def hi_slow():
     switch_pin(11)
     time.sleep(SLOW)
-    switch_pin(13)
+    switch_pin(15)
     
 def hi():
     switch_pin(11)
-    switch_pin(13)  
+    switch_pin(15)  
     
 def med():
-    switch_pin(11)
+    switch_pin(15)
     
 def low():
-    switch_pin(13)
+    switch_pin(15)
     
 def all_off():
     """
@@ -48,9 +48,9 @@ def all_off():
     """
     GPIO.setmode(GPIO.BOARD) # Numbers GPIOs by physical location 
     GPIO.setup(11, GPIO.OUT)
-    GPIO.setup(13, GPIO.OUT)
+    GPIO.setup(15, GPIO.OUT)
     GPIO.output(11, GPIO.LOW)
-    GPIO.output(13, GPIO.LOW)
+    GPIO.output(15, GPIO.LOW)
     
 def blink(on_type):
     """
